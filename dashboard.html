@@ -1,0 +1,418 @@
+<!--<%@ page import="com.arturkasymov.model.interactors.LoginInteractor" %>
+<%@ page import="com.arturkasymov.model.interactors.Interactor" %>
+<%@ page import="com.arturkasymov.constants.Pages" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+
+
+<%
+    response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+
+    String username = (String) session.getAttribute("username");
+
+    LoginInteractor interactor = Interactor.getInstance();
+    if(!interactor.checkPermission(Pages.DASHBOARD,username)){
+        response.setStatus(response.SC_MOVED_TEMPORARILY);
+        response.setHeader("Location", "/crm");
+    }
+%> -->
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Dashboards</title>
+
+    <style>
+    	*{
+    		margin: 0;
+    		padding: 0;
+    		box-sizing: border-box;
+    		font-family: "Lato", sans-serif;
+    	}
+        body {
+            font-family: "Lato", sans-serif;
+            font-size: 14px;
+            margin: 0;
+            overflow-x: hidden;
+        }
+        .top_nav {
+        	display: flex;
+        	height: 8.5vh;
+        	width: 100vw;
+        	background-color: #333;
+        	align-items: center;
+        	justify-content: space-between;
+        }
+
+        .logout {
+        	margin: 0;
+        	margin-right: 1.5em;
+        }
+        .logout > input {
+        	cursor: pointer;
+        	display: flex;
+            color: #303030;
+            font-size: 1.2em;
+            align-items: center;
+            justify-content: center;
+            padding: 0.2em 0.3em;
+            text-decoration: none;
+            border: none;
+            border-radius: 0.2em;
+            background-color: gainsboro;
+        }
+        .open_nav {
+        	margin: 0;
+        }
+
+        .sidenav {
+            height: 91.5vh;
+            width: 20vw;
+            position: relative;
+            z-index: 1;
+            top: 0;
+            left: 0;
+            background-color: #333;
+            overflow-x: hidden;
+            transition: 0.5s;
+            padding-top: 4.5em;
+        }
+
+        .sidenav a {
+            padding: 8px 8px 8px 32px;
+            text-decoration: none;
+            font-size: 25px;
+            color: #818181;
+            display: block;
+            transition: 0.3s;
+        }
+
+        .sidenav a:hover {
+            color: #f1f1f1;
+        }
+
+        .sidenav .closebtn {
+            position: absolute;
+            top: 0;
+            right: 25px;
+            font-size: 36px;
+            margin-left: 50px;
+        }
+
+        @media screen and (max-height: 450px) {
+            .sidenav {padding-top: 15px;}
+            .sidenav a {font-size: 18px;}
+        }
+        .main_block {
+        	margin-left: -20vw;
+        	width: 120vw;
+        	display: flex;
+        	align-items: center;
+        	justify-content: space-between;
+        	transition: 0.5s margin;
+        }
+        .wrap {
+        	margin-right: 5vw;
+        	width: 80vw;
+        	display: flex;
+        	align-items: center;
+        	justify-content: space-between;
+        }
+        .chart { 
+        	width: 50vw;
+        	height: 65vh;
+        	border-radius: 1em;
+        	box-shadow: 1px 1px 6px 1px #999999;
+        }
+        .chart_types {
+        	border-radius: 1em;
+        	box-shadow: 1px 1px 6px 1px #999999;
+        	width: 50vw;
+        	height: 7vh;
+        	margin-top: 4vh;
+        	background-color: #fff;
+        	display: flex;
+        	align-items: center;
+        	justify-content: space-around;
+        }
+        .chart_types > li {
+        	list-style: none;
+        	width: 12vw;
+        	height: 100%;
+        	display: flex;
+        	align-items: center;
+        	justify-content: center;
+        }
+        .chart_types > li > label {
+        	color: #333;
+        	font-size: 1.1em;
+        }
+        .checkbox {
+        	width: 1.2em;
+        	height: 1.2em;
+        	outline: none;
+        	border: none;
+        	margin-right: 0.7em;
+        	margin-left: 0.7em;
+        }
+        .dates {
+        	display: flex;
+        	flex-flow: row wrap;
+        	justify-content: space-between;
+        	align-items: center;
+        	height: 3em;
+        	width: 100%;
+        	margin-bottom: 2.5em;
+        }
+        .dates > li {
+        	list-style: none;
+      		display: flex;
+      		flex-flow: row wrap;
+      		height: 2em;
+      		align-items: center;
+      		width: 49%;
+        }
+        .date {
+        	width: 100%;
+        	font-size: 0.9em;
+        	border: none;
+        	border-bottom: 0.1vh solid #333;
+        }
+        .d_label {
+        	display: flex;
+        	align-items: center;
+        	height: 1.4em;
+        	font-size: 1.1em;
+        	font-weight: bold;
+        }
+        .filters {
+        	width: 20vw;
+        	height: 77vh;
+        	border-radius: 1em;
+        	box-shadow: 1px 1px 6px 1px #999999;
+        	margin-right: 5vw;
+        	background-color: #fff;
+        	padding: 1em;
+        	padding-top: 0.5em;
+        }
+        .filter {
+        	display: flex;
+        	justify-content: center;
+        	flex-flow: column;
+        	margin-top: 1em;
+        	border-bottom: 0.1vh solid #000;
+        	padding-bottom: 0.3em;
+        	padding-left: 0.2em;
+        	overflow: hidden;
+        }
+        .filter > label {
+        	font-size: 1.3em;
+        	color: #333;
+        	display: flex;
+        	align-items: center;
+        	height: 1.8em;
+        	cursor: pointer;
+        	transition: 0.5s;
+        }
+        .subfilters {
+        	display: flex;
+        	flex-flow: column;
+        	margin-left: -110%;
+        	transition: 0.4s margin;
+        }
+        .subfilters > li {
+        	display: flex;
+        	height: 2.1em;
+        	align-items: center;
+        	list-style: none;
+        	width: 18vw;
+        	height: 0;
+        	transition: 0.4s height;
+        }
+        .subfilters > li > label {
+        	font-size: 1.15em;
+        	color: #333;
+        	width: 90%;
+        }
+    </style>
+</head>
+<body>
+
+	<nav class="top_nav">
+		 <span class="open_nav" style="font-size:30px; padding-left: 5px; color: #f2f2f2; cursor:pointer" onclick="openNav()">&#9776; </span>
+
+    	<form class="logout" action="logoutAPI">
+        	<input type="submit" value="Logout">
+    	</form>
+	</nav>
+
+	<div class="main_block" id="main">
+		<div id="mySidenav" class="sidenav">
+    		<a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+       		<a href="">Overview</a>
+       		<a href="">Add report</a>
+       		<a href="charts">Charts</a>
+   		</div>
+   		<div class="wrap">
+
+   			<div class="chart_wrap">
+   				<div class="chart">
+   				</div>
+   				<div class="chart_types" id="charttype">
+   					<li>
+   						<input type="checkbox" class="checkbox" value="1" name="check1">
+   						<label for="check1">Estimate earnings</label>
+   					</li>
+   					<li>
+   						<input type="checkbox" class="checkbox" value="2" name="check2">
+   						<label for="check2">Impressions</label>
+   					</li>
+   					<li>
+   						<input type="checkbox" class="checkbox" value="4" name="check3">
+   						<label for="check3">Clicks</label>
+   					</li>
+   				</div>
+   			</div>
+
+   			<div class="filters">
+   				<div class="dates">
+   					<li>
+   						<label for="b_date" class="d_label">From</label>
+   						<input type="date" class="date" name="b_date" id="b_date" value="2019-12-01" max="2030-12-01">
+   					</li>
+   					<li>
+   						<label for="e_date" class="d_label">To</label>
+   						<input type="date" class="date" name="e_date" id="e_date" value="2019-12-01" max="2030-12-01"> 
+   					</li>
+   				</div>
+
+   				<div id="filter_wrap">
+   				<div class="filter">
+   					<label class="label" for="f1">Platforms</label>
+   					<div class="subfilters" id="platform">
+   						<li>
+   							<label class="label" for="sf11">Android</label>	
+   							<input type="checkbox" class="checkbox" name="sf11" value="1">
+   						</li>
+   						<li>
+   							<label class="label" for="sf12">IOS</label>	
+   							<input type="checkbox" class="checkbox" name="sf12" value="2">
+   						</li>
+   					</div>
+   				</div>
+   				<div class="filter">
+   					<label class="label" for="f1">Appliaction</label>
+   					<div class="subfilters" id="app">
+   						<li>
+   							<label class="label" for="sf13">Mova</label>	
+   							<input type="checkbox" class="checkbox" name="sf13" value="1"> 
+   						</li>
+   						<li>
+   							<label class="label" for="sf14">Litra</label>	
+   							<input type="checkbox" class="checkbox" name="sf14" value="2">
+   						</li>
+   					</div>
+   				</div>
+   				<div class="filter">
+   					<label class="label" for="f1">Add unit group</label>
+   					<div class="subfilters" id="addunit">
+   						<li>
+   							<label class="label" for="sf15">Game banner</label>	
+   							<input type="checkbox" class="checkbox" name="sf15" value="1">
+   						</li>
+   						<li>
+   							<label class="label" for="sf16">Reward video</label>	
+   							<input type="checkbox" class="checkbox" name="sf16" value="2">
+   						</li>
+   					</div>
+   				</div>
+   			</div>
+   			</div>
+   		</div>
+	</div>
+	
+
+
+
+<script>
+    function openNav() {
+        document.getElementById("main").style.marginLeft = "0";
+    }
+
+    function closeNav() {
+     	document.getElementById("main").style.marginLeft = "-20vw";
+    }
+
+    for(let filter of document.getElementsByClassName("filter")) {
+    	filter.children[0].onclick = function(){
+    		filter.classList.toggle("clicked");
+    		let filt = this.parentElement;
+    		if(filt.classList.contains("clicked")){
+    			filt.children[1].style.marginLeft = "0";
+    			subfilters = filt.getElementsByTagName("li");
+    			for(subf of subfilters){
+	    			subf.style.height = "2.1em";
+    			}
+    		}else {
+    			filter.children[1].style.marginLeft = "-110%";
+    			subfilters = filter.getElementsByTagName("li");
+    			for(subf of subfilters){
+    				subf.style.height = "0";
+    			}
+    		}
+    	}
+    }
+
+    var url = "http://example/com?par=1&platform=0&addunit=0&app=0&charttype=0&bdate=2019-11-31&edate=2019-11-01";
+    for(let checkbox of document.getElementsByClassName("checkbox")){
+    	checkbox.onclick = function(){
+    		let elem = this;
+    		let parent = this.parentElement.parentElement;
+    		let cat = parent.id;
+    		let param = 0;
+    		for(let checkb of parent.getElementsByTagName("input")){
+    			if(checkb.checked){param += parseInt(checkb.value);}
+    		}
+    		let add_url = `&${cat}=${param}`;
+    		let repl = new RegExp('&' + cat + '=\.');
+    		url = url.replace(repl , add_url);
+    		sendAjax('GET', url);
+    	};
+    }
+
+    document.getElementById('b_date').onchange = function(){
+    	let date = `&bdate=${this.value}`;
+    	let repl = new RegExp('&' + 'bdate' + '=\.\.\.\.\.\.\.\.\.\.');
+    	url = url.replace(repl , date);
+    	sendAjax('GET', url);
+    }
+
+    document.getElementById('e_date').onchange = function(){
+    	let date = `&edate=${this.value}`;
+    	let repl = new RegExp('&' + 'edate' + '=\.\.\.\.\.\.\.\.\.\.');
+    	url = url.replace(repl , date);
+    	sendAjax('GET', url);
+    }
+
+    function sendAjax(method, url, callback = function(){}, params) {
+		let request = new XMLHttpRequest();
+		request.onreadystatechange = function(){
+			if(request.readyState == 4 && request.status == 200){
+				callback(request.responseText);
+			}else if(request.status == 404){
+				alert("Not Found");
+			}
+		}
+		if(method == 'GET'){
+			request.open(method, url);
+			request.send();
+		}else if(method == 'POST'){
+			request.open(method, url);
+			request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+			request.send(params);
+		}
+	}
+</script>
+
+</body>
+</html>
